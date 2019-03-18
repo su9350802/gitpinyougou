@@ -28,4 +28,7 @@ public interface SpecificationOptionDao {
     int updateByPrimaryKeySelective(SpecificationOption record);
 
     int updateByPrimaryKey(SpecificationOption record);
+
+    // 批量插入
+    void insertSelectives(List<SpecificationOption> specificationOptionList);
 }

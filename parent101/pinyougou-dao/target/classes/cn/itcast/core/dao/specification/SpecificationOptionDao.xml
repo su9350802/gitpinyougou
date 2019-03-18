@@ -194,8 +194,21 @@
   <update id="updateByPrimaryKey" parameterType="cn.itcast.core.pojo.specification.SpecificationOption" >
     update tb_specification_option
     set option_name = #{optionName,jdbcType=VARCHAR},
-      spec_id = #{specId,jdbcType=BIGINT},
+      option_name = #{specId,jdbcType=BIGINT},
       orders = #{orders,jdbcType=INTEGER}
     where id = #{id,jdbcType=BIGINT}
   </update>
+
+  <!-- 批量插入-->
+  <insert id="insertSelectives" parameterType="list">
+      insert into tb_specification_option(option_name,spec_id,orders)
+      values
+      <foreach collection="list" item="entity" separator=",">
+        (
+          #{entity.optionName},
+          #{entity.specId},
+          #{entity.orders}
+        )
+      </foreach>
+  </insert>
 </mapper>

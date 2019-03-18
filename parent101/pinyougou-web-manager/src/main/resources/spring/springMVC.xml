@@ -46,9 +46,9 @@
     <!--配置应用名称-->
     <dubbo:application name="pinyougou-web-manager"/>
     <!--配置注册中心的地址-->
-    <dubbo:registry address="zookeeper://192.168.200.128:2181"/>
+    <dubbo:registry address="zookeeper://192.168.64.129:2181"/>
     <!--配置扫描暴露的接口位置-->
-    <dubbo:annotation package="cn.itcast.core.controller.brand"/>
+    <dubbo:annotation package="cn.itcast.core.controller"/>
     <!--配置调用提供方的超时时间-->
     <!--
         timeout:连接的超时时间

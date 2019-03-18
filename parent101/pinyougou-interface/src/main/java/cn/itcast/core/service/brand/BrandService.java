@@ -7,11 +7,51 @@ import java.util.List;
 
 public interface BrandService {
 
+   /**
+    * 品牌查询不分页
+    * @return
+    */
    List<Brand> findAll();
 
-   public PageResult findPage(Integer pageNum,Integer pageSize);
+   /**
+    * 品牌分页查询
+    * @param pageNum
+    * @param pageSize
+    * @return
+    */
+   PageResult findPage(Integer pageNum,Integer pageSize);
 
-   public PageResult search(Integer pageNum,Integer pageSize,Brand brand);
+   /**
+    * 品牌分页条件查询
+    * @param pageNum
+    * @param pageSize
+    * @param brand
+    * @return
+    */
+   PageResult search(Integer pageNum,Integer pageSize,Brand brand);
 
+   /**
+    * 添加品牌
+    * @param brand
+    */
    void add(Brand brand);
+
+   /**
+    * 根据id修改回显数据
+    * @param id
+    * @return
+    */
+   Brand findOne(Long id);
+
+   /**
+    * 更新品牌
+    * @param brand
+    */
+   void update(Brand brand);
+
+   /**
+    * 批量删除
+    * @param ids
+    */
+   void delete(Long[] ids);
 }
