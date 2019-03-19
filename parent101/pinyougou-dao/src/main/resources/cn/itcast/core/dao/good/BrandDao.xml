@@ -193,4 +193,9 @@
         </foreach>
     </where>
   </delete>
+
+  <!-- 新增模板：初始化品牌的下拉框列表数据-->
+  <select id="selectOptionList" resultType="map">
+    select id,name text from tb_brand
+  </select>
 </mapper>

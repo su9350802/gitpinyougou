@@ -5,6 +5,7 @@ import cn.itcast.core.pojo.specification.SpecificationQuery;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface SpecificationDao {
     int countByExample(SpecificationQuery example);
@@ -28,4 +29,7 @@ public interface SpecificationDao {
     int updateByPrimaryKeySelective(Specification record);
 
     int updateByPrimaryKey(Specification record);
+
+    // 新增模板：初始化规格的下拉框列表数据
+    List<Map<String,String>> selectOptionList();
 }

@@ -1,42 +1,30 @@
-package cn.itcast.core.controller.spec;
+package cn.itcast.core.controller.temp;
 
 import cn.itcast.core.entity.PageResult;
 import cn.itcast.core.entity.Result;
-import cn.itcast.core.pojo.specification.Specification;
-import cn.itcast.core.service.spec.SpecService;
-import cn.itcast.core.vo.SpecVo;
+import cn.itcast.core.pojo.template.TypeTemplate;
+import cn.itcast.core.service.temp.TypeTemplateService;
 import com.alibaba.dubbo.config.annotation.Reference;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
-
 @RestController
-@RequestMapping("/specification")
-public class SpecController {
+@RequestMapping("/typeTemplate")
+public class TypeTemplateController {
 
     @Reference
-    private SpecService specService;
+    private TypeTemplateService typeTemplateService;
 
-    /**
-     * 规格列表查询
-     *
-     * @param page
-     * @param rows
-     * @param specification
-     * @return
-     */
     @RequestMapping("/search.do")
-    public PageResult search(Integer page, Integer rows, @RequestBody Specification specification) {
-        return specService.search(page, rows, specification);
+    public PageResult search(Integer page, Integer rows, @RequestBody TypeTemplate typeTemplate) {
+        return typeTemplateService.search(page,rows,typeTemplate);
     }
 
     @RequestMapping("/add.do")
-    public Result add(@RequestBody SpecVo specVo) {
+    public Result add(@RequestBody TypeTemplate typeTemplate) {
         try {
-            specService.add(specVo);
+            typeTemplateService.add(typeTemplate);
             return new Result(true,"保存成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -45,14 +33,14 @@ public class SpecController {
     }
 
     @RequestMapping("/findOne.do")
-    public SpecVo findOne(Long id) {
-        return specService.findOne(id);
+    public TypeTemplate findOne(Long id) {
+        return typeTemplateService.findOne(id);
     }
 
     @RequestMapping("/update.do")
-    public Result update(@RequestBody SpecVo specVo) {
+    public Result update(@RequestBody TypeTemplate typeTemplate) {
         try {
-            specService.update(specVo);
+            typeTemplateService.update(typeTemplate);
             return new Result(true,"修改成功");
         } catch (Exception e) {
             e.printStackTrace();
@@ -63,21 +51,11 @@ public class SpecController {
     @RequestMapping("/delete.do")
     public Result delete(Long[] ids) {
         try {
-            specService.delete(ids);
+            typeTemplateService.delete(ids);
             return new Result(true,"删除成功");
         } catch (Exception e) {
             e.printStackTrace();
             return new Result(false,"删除失败");
         }
     }
-
-    /**
-     * 新增模板：初始化规格的下拉框列表数据
-     * @return
-     */
-    @RequestMapping("/selectOptionList.do")
-    public List<Map<String ,String>> selectOptionList() {
-        return specService.selectOptionList();
-    }
-
 }

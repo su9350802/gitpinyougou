@@ -5,6 +5,7 @@ import cn.itcast.core.pojo.good.BrandQuery;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 public interface BrandDao {
     int countByExample(BrandQuery example);
@@ -31,4 +32,7 @@ public interface BrandDao {
 
     // 批量删除
     void deleteByPrimaryKeys(Long[] ids);
+
+    // 新增模板：初始化品牌的下拉框列表数据
+    List<Map<String,String>> selectOptionList();
 }

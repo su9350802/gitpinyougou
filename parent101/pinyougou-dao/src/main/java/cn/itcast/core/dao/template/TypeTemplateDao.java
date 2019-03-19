@@ -28,4 +28,6 @@ public interface TypeTemplateDao {
     int updateByPrimaryKeySelective(TypeTemplate record);
 
     int updateByPrimaryKey(TypeTemplate record);
+
+    void deleteByPrimaryKeys(Long[] ids);
 }

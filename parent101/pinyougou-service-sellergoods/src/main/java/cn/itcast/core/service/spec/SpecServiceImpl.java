@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SpecServiceImpl implements SpecService {
@@ -141,5 +142,14 @@ public class SpecServiceImpl implements SpecService {
                 specificationDao.deleteByPrimaryKey(id);
             }
         }
+    }
+
+    /**
+     * 新增模板：初始化规格的下拉框列表数据
+     * @return
+     */
+    @Override
+    public List<Map<String, String>> selectOptionList() {
+        return specificationDao.selectOptionList();
     }
 }

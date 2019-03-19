@@ -4,6 +4,7 @@ import cn.itcast.core.entity.PageResult;
 import cn.itcast.core.pojo.good.Brand;
 
 import java.util.List;
+import java.util.Map;
 
 public interface BrandService {
 
@@ -54,4 +55,12 @@ public interface BrandService {
     * @param ids
     */
    void delete(Long[] ids);
+
+   /**
+    * 新增模板：初始化品牌的下拉框列表数据
+    * @return
+    */
+   List<Map<String,String>> selectOptionList();
+
+
 }

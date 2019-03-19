@@ -4,6 +4,9 @@ import cn.itcast.core.entity.PageResult;
 import cn.itcast.core.pojo.specification.Specification;
 import cn.itcast.core.vo.SpecVo;
 
+import java.util.List;
+import java.util.Map;
+
 public interface SpecService {
 
     /**
@@ -39,4 +42,10 @@ public interface SpecService {
      * @param ids
      */
     void delete(Long[] ids);
+
+    /**
+     * 新增模板：初始化规格的下拉框列表数据
+     * @return
+     */
+    List<Map<String,String>> selectOptionList();
 }
