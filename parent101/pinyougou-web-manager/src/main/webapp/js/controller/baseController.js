@@ -30,6 +30,11 @@ app.controller("baseController",function($scope){
 		}
 		
 	}
+
+	// 回显复选框
+	$scope.isChecked = function (id) {
+		return $scope.selectIds.indexOf(id) >= 0;
+    }
 	
 	// 定义方法：获取JSON字符串中的某个key对应值的集合
 	$scope.jsonToString = function(jsonStr,key){

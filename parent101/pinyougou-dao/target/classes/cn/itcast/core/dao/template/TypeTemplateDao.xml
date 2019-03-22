@@ -220,7 +220,7 @@
 
     <!-- 批量删除-->
     <delete id="deleteByPrimaryKeys" parameterType="Long[]">
-        delete from tb_type_template
+        delete from tb_type_template where id in xx,xx,xx
         <where>
             <foreach collection="array" item="id" open="id in (" separator="," close=")">
                 #{id}

@@ -1,21 +1,30 @@
 package cn.itcast.core.service.temp;
 
+import cn.itcast.core.dao.specification.SpecificationOptionDao;
 import cn.itcast.core.dao.template.TypeTemplateDao;
 import cn.itcast.core.entity.PageResult;
+import cn.itcast.core.pojo.specification.SpecificationOption;
+import cn.itcast.core.pojo.specification.SpecificationOptionQuery;
 import cn.itcast.core.pojo.template.TypeTemplate;
 import cn.itcast.core.pojo.template.TypeTemplateQuery;
 import com.alibaba.dubbo.config.annotation.Service;
+import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class TypeTemplateServiceImpl implements TypeTemplateService {
 
     @Resource
     private TypeTemplateDao typeTemplateDao;
+
+    @Resource
+    private SpecificationOptionDao specificationOptionDao;
 
     /**
      * 模板列表查询
@@ -85,4 +94,39 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
             typeTemplateDao.deleteByPrimaryKeys(ids);
         }
     }
-}
+
+    /**
+     * 新增分类时:加载模板列表
+     * @return
+     */
+    @Override
+    public List<TypeTemplate> findAll() {
+        return typeTemplateDao.selectByExample(null);
+    }
+
+    /**
+     * 新增商品选择三级分类确定模板：加载规格以及规格选项
+     * @param id
+     * @return
+     */
+    @Override
+    public List<Map> findBySpecList(Long id) {
+        // 通过模板id获取规格
+        TypeTemplate typeTemplate = typeTemplateDao.selectByPrimaryKey(id);
+        String specIds = typeTemplate.getSpecIds();
+        List<Map> specList = JSON.parseArray(specIds, Map.class);
+        // 通过规格id获取规格选项
+        if (specList != null && specList.size() > 0) {
+            for (Map map : specList) {
+                Long specId = Long.parseLong(map.get("id").toString());
+                // 通过规格id获取规格选项
+                SpecificationOptionQuery query = new SpecificationOptionQuery();
+                query.createCriteria().andSpecIdEqualTo(specId);
+                List<SpecificationOption> options = specificationOptionDao.selectByExample(query);
+                // 封装到map
+                map.put("options",options);
+            }
+        }
+        return specList;
+    }
+ }
