@@ -46,4 +46,13 @@ public class ItemCatController {
             return new Result(false,"保存失败");
         }
     }
+
+    /**
+     * 查询所有列表
+     * @return
+     */
+    @RequestMapping("/findAll.do")
+    public List<ItemCat> findAll() {
+        return itemCatService.findAll();
+    }
 }

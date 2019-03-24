@@ -38,6 +38,7 @@ public class GoodsController {
 
     /**
      * 查询商品列表信息
+     *
      * @param page
      * @param rows
      * @param goods
@@ -48,6 +49,34 @@ public class GoodsController {
         // 设置商家id
         String sellerId = SecurityContextHolder.getContext().getAuthentication().getName();
         goods.setSellerId(sellerId);
-        return goodsService.search(page,rows,goods);
+        return goodsService.search(page, rows, goods);
+    }
+
+    /**
+     * 商品编辑
+     *
+     * @param id
+     * @return
+     */
+    @RequestMapping("/findOne.do")
+    public GoodsVo findOne(Long id) {
+        return goodsService.findOne(id);
+    }
+
+    /**
+     * 商品更新
+     *
+     * @param goodsVo
+     * @return
+     */
+    @RequestMapping("/update.do")
+    public Result update(@RequestBody GoodsVo goodsVo) {
+        try {
+            goodsService.update(goodsVo);
+            return new Result(true, "修改成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new Result(false, "修改失败");
+        }
     }
 }

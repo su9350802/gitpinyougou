@@ -5,5 +5,8 @@ app.controller("indexController",function($scope,loginService){
 			$scope.loginName = response.username;
 		});
 	}
-	
+
+	// 当前的登录时间
+	$scope.date = new Date().toLocaleDateString();
+	$scope.time = new Date().toLocaleTimeString();
 });
