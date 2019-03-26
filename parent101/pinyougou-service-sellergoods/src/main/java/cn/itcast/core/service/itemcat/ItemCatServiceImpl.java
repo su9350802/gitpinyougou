@@ -4,6 +4,7 @@ import cn.itcast.core.dao.item.ItemCatDao;
 import cn.itcast.core.pojo.item.ItemCat;
 import cn.itcast.core.pojo.item.ItemCatQuery;
 import com.alibaba.dubbo.config.annotation.Service;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -14,6 +15,9 @@ public class ItemCatServiceImpl implements ItemCatService {
     @Resource
     private ItemCatDao itemCatDao;
 
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+
     /**
      * 商品分类的列表查询
      *
@@ -22,6 +26,15 @@ public class ItemCatServiceImpl implements ItemCatService {
      */
     @Override
     public List<ItemCat> findByParentId(Long parentId) {
+
+        // 将分类的数据写到缓存中
+        List<ItemCat> itemCatList = itemCatDao.selectByExample(null);
+        if (itemCatList != null && itemCatList.size() > 0) {
+            for (ItemCat itemCat : itemCatList) {
+                redisTemplate.boundHashOps("itemCatList").put(itemCat.getName(),itemCat.getTypeId());
+            }
+        }
+
         // 设置查询条件
         ItemCatQuery query = new ItemCatQuery();
         query.createCriteria().andParentIdEqualTo(parentId);
@@ -32,6 +45,7 @@ public class ItemCatServiceImpl implements ItemCatService {
 
     /**
      * 保存分类
+     *
      * @param itemCat
      */
     @Override
@@ -41,6 +55,7 @@ public class ItemCatServiceImpl implements ItemCatService {
 
     /**
      * 新增商品选择三级分类：加载模板
+     *
      * @param id
      * @return
      */
@@ -51,6 +66,7 @@ public class ItemCatServiceImpl implements ItemCatService {
 
     /**
      * 查询所有分类类别
+     *
      * @return
      */
     @Override

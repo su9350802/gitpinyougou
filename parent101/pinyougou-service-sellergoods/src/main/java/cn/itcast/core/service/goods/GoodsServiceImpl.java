@@ -17,6 +17,7 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -45,6 +46,9 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Resource
     private SellerDao sellerDao;
+
+    @Resource
+    private SolrTemplate solrTemplate;
 
     /**
      * 商品录入
@@ -255,10 +259,31 @@ public class GoodsServiceImpl implements GoodsService {
                 goods.setId(id);
                 goodsDao.updateByPrimaryKeySelective(goods);
                 if ("1".equals(status)) {
-                    // TODO:将商品保存到索引库中
-                    // TODO:生成该商品详情的静态页
+                    // TODO 2.将商品进行上架：将数据保存到索引库
+                    // 为了测试检索：将库存的数据全部保存到索引库中
+                    dataImportToSolr();
+                    // TODO 3.生成商品详情的静态页
                 }
             }
+        }
+    }
+
+    // 将库存的数据全部保存到索引库中
+    private void dataImportToSolr() {
+        // 查询出库存的数据
+        ItemQuery itemQuery = new ItemQuery();
+        itemQuery.createCriteria().andStatusEqualTo("1");
+        List<Item> items = itemDao.selectByExample(itemQuery);
+        if (items != null && items.size() > 0) {
+            // 设置动态字段：item_spec_内存：32G
+            for (Item item : items) {
+                // 取出规格
+                String spec = item.getSpec();
+                Map<String, String> specMap = JSON.parseObject(spec, Map.class);
+                item.setSpecMap(specMap);
+            }
+            solrTemplate.saveBeans(items);
+            solrTemplate.commit();
         }
     }
 

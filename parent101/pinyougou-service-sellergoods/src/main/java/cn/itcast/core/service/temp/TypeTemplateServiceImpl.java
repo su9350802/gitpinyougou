@@ -11,6 +11,7 @@ import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -26,6 +27,9 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
     @Resource
     private SpecificationOptionDao specificationOptionDao;
 
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
+
     /**
      * 模板列表查询
      *
@@ -36,6 +40,21 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
      */
     @Override
     public PageResult search(Integer page, Integer rows, TypeTemplate typeTemplate) {
+
+        // 将模板数据放入缓存
+        List<TypeTemplate> list = typeTemplateDao.selectByExample(null);
+        if (list != null && list.size() > 0) {
+            for (TypeTemplate template : list) {
+                // 缓存该模板下的品牌
+                List<Map> brandList = JSON.parseArray(template.getBrandIds(), Map.class);
+                redisTemplate.boundHashOps("brandList").put(template.getId(),brandList);
+                //缓存该模板下规格
+                List<Map> specList = findBySpecList(template.getId());
+                redisTemplate.boundHashOps("specList").put(template.getId(),specList);
+            }
+        }
+
+
         // 1.设置分页条件
         PageHelper.startPage(page, rows);
         // 2.设置查询条件
@@ -97,6 +116,7 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 
     /**
      * 新增分类时:加载模板列表
+     *
      * @return
      */
     @Override
@@ -106,6 +126,7 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
 
     /**
      * 新增商品选择三级分类确定模板：加载规格以及规格选项
+     *
      * @param id
      * @return
      */
@@ -124,9 +145,9 @@ public class TypeTemplateServiceImpl implements TypeTemplateService {
                 query.createCriteria().andSpecIdEqualTo(specId);
                 List<SpecificationOption> options = specificationOptionDao.selectByExample(query);
                 // 封装到map
-                map.put("options",options);
+                map.put("options", options);
             }
         }
         return specList;
     }
- }
+}
