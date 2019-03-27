@@ -18,6 +18,7 @@ import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import org.springframework.data.solr.core.SolrTemplate;
+import org.springframework.data.solr.core.query.SimpleQuery;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
@@ -259,12 +260,34 @@ public class GoodsServiceImpl implements GoodsService {
                 goods.setId(id);
                 goodsDao.updateByPrimaryKeySelective(goods);
                 if ("1".equals(status)) {
-                    // TODO 2.将商品进行上架：将数据保存到索引库
+                    // 2.将商品进行上架：将数据保存到索引库
+                    // 将该商品对应的库存(多个-价格最低的库存) 保存到索引库中
+                    saveItemToSolr(id);
                     // 为了测试检索：将库存的数据全部保存到索引库中
-                    dataImportToSolr();
+                    // dataImportToSolr();
                     // TODO 3.生成商品详情的静态页
                 }
             }
+        }
+    }
+
+    // 将商品对应的库存保存到索引库中
+    private void saveItemToSolr(Long id) {
+        ItemQuery itemQuery = new ItemQuery();
+        // 条件：根据商品id查询对应的库存，并且库存大于0的
+        itemQuery.createCriteria().andGoodsIdEqualTo(id).andStatusEqualTo("1")
+                .andIsDefaultEqualTo("1").andNumGreaterThan(0);
+        List<Item> items = itemDao.selectByExample(itemQuery);
+        if (items != null && items.size() > 0) {
+            // 设置动态字段：item_spec_内存：32G
+            for (Item item : items) {
+                // 取出规格
+                String spec = item.getSpec();
+                Map<String, String> specMap = JSON.parseObject(spec, Map.class);
+                item.setSpecMap(specMap);
+            }
+            solrTemplate.saveBeans(items);
+            solrTemplate.commit();
         }
     }
 
@@ -301,7 +324,10 @@ public class GoodsServiceImpl implements GoodsService {
             for (Long id : ids) {
                 goods.setId(id);
                 goodsDao.updateByPrimaryKeySelective(goods);
-                // TODO:将商品保存到索引库中
+                // 2.商品下架
+                SimpleQuery query = new SimpleQuery("item_goodsid:" + id);
+                solrTemplate.delete(query);
+                solrTemplate.commit();
                 // TODO:生成该商品详情的静态页
             }
         }

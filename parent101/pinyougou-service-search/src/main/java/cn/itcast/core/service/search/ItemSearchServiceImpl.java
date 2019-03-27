@@ -4,6 +4,7 @@ import cn.itcast.core.pojo.item.Item;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.solr.core.SolrTemplate;
 import org.springframework.data.solr.core.query.*;
@@ -31,6 +32,12 @@ public class ItemSearchServiceImpl implements ItemSearchService {
     public Map<String, Object> search(Map<String, String> searchMap) {
         // 创建一个大map，封装所有的结果集
         Map<String, Object> resultMap = new HashMap<>();
+        // 处理关键字中包含的空格的问题
+        String keywords = searchMap.get("keywords");
+        if (keywords != null && !"".equals(keywords)) {
+            keywords = keywords.replace(" ", "");
+            searchMap.put("keywords", keywords);
+        }
         // 1.根据关键字检索并且分页
         // Map<String, Object> map = searchForPage(searchMap);
 
@@ -71,7 +78,6 @@ public class ItemSearchServiceImpl implements ItemSearchService {
             criteria.is(keywords);
         }
         SimpleQuery query = new SimpleQuery(criteria);
-        filterCriteria(searchMap,query);
 
         // 2、设置分组条件
         GroupOptions groupOptions = new GroupOptions();
@@ -102,13 +108,26 @@ public class ItemSearchServiceImpl implements ItemSearchService {
             criteria.is(keywords);
         }
         SimpleHighlightQuery query = new SimpleHighlightQuery(criteria);
-        filterCriteria(searchMap,query);
+        filterCriteria(searchMap, query);
         // 2.设置分页条件
         Integer pageNo = Integer.valueOf(searchMap.get("pageNo"));
         Integer pageSize = Integer.valueOf(searchMap.get("pageSize"));
         Integer start = (pageNo - 1) * pageSize;
         query.setOffset(start);    // 起始行
         query.setRows(pageSize);   // 每页显示的条数
+
+        // 添加排序条件
+        // 根据新品、价格排序
+        String sort = searchMap.get("sort");
+        if (sort != null && !"".equals(sort)) {
+            if ("ASC".equals(sort)) {
+                Sort s = new Sort(Sort.Direction.ASC, "item_" + searchMap.get("sortField"));
+                query.addSort(s);
+            } else {
+                Sort s = new Sort(Sort.Direction.DESC, "item_" + searchMap.get("sortField"));
+                query.addSort(s);
+            }
+        }
 
         // 3.设置高亮条件
         HighlightOptions highlightOptions = new HighlightOptions();
@@ -149,7 +168,6 @@ public class ItemSearchServiceImpl implements ItemSearchService {
             criteria.is(keywords);  // is不是等于某个值。is方法：根据词条进行模糊检索
         }
         SimpleQuery query = new SimpleQuery(criteria);
-        filterCriteria(searchMap,query);
         // 2.设置分页条件
         Integer pageNo = Integer.valueOf(searchMap.get("pageNo"));
         Integer pageSize = Integer.valueOf(searchMap.get("pageSize"));
