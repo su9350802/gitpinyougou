@@ -28,7 +28,7 @@
         <property name="destination" ref="topicPageAndSolrDestination" />
         <property name="messageListener" ref="pageAndSolrListener" />
     </bean>
-    <bean id="pageAndSolrListener" class="cn.itcast.core.listener.ItemSearchListener"></bean>
+    <bean id="pageAndSolrListener" class="cn.itcast.core.listener.PageListener"></bean>
 
 
     <!-- 点对点模式，删除索引库-->

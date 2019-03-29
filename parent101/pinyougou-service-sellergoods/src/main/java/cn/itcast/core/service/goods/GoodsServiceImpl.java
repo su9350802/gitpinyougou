@@ -12,7 +12,6 @@ import cn.itcast.core.pojo.good.GoodsDesc;
 import cn.itcast.core.pojo.good.GoodsQuery;
 import cn.itcast.core.pojo.item.Item;
 import cn.itcast.core.pojo.item.ItemQuery;
-import cn.itcast.core.service.staticpage.StaticPageService;
 import cn.itcast.core.vo.GoodsVo;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.alibaba.fastjson.JSON;
@@ -54,9 +53,6 @@ public class GoodsServiceImpl implements GoodsService {
 
     @Resource
     private SolrTemplate solrTemplate;
-
-    @Resource
-    private StaticPageService staticPageService;
 
     @Resource
     private JmsTemplate jmsTemplate;
