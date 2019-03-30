@@ -87,6 +87,20 @@ public class ItemSearchServiceImpl implements ItemSearchService {
         }
     }
 
+    /**
+     * @author 举个栗子
+     * @Description 商品下架-从索引库删除数据
+     * @Date 16:24 2019/3/30
+      * @param id
+     * @return void
+     **/
+    @Override
+    public void deleteItemFromSolr(Long id) {
+        SimpleQuery query = new SimpleQuery("item_goodsid:" + id);
+        solrTemplate.delete(query);
+        solrTemplate.commit();
+    }
+
     // 默认加载第一个分类下的品牌、规格结果集
     private Map<String, Object> findBrandsAndSpecsByCategoryNameWithOne(String categoryName) {
         Map<String, Object> map = new HashMap<>();

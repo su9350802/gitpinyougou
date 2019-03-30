@@ -19,4 +19,13 @@ public interface ItemSearchService {
      * @return void
      **/
     void addItemToSolr(Long id);
+
+    /**
+     * @author 举个栗子
+     * @Description 商品下架-从索引库删除数据
+     * @Date 16:24 2019/3/30
+      * @param id
+     * @return void
+     **/
+    void deleteItemFromSolr(Long id);
 }
