@@ -31,4 +31,23 @@ public interface CartService {
      * @return java.util.List<cn.itcast.core.pojo.cart.Cart>
      **/
     List<Cart> autoDataToCart(List<Cart> cartList);
+
+    /**
+     * @author 举个栗子
+     * @Description 将本地购物车合并到redis中
+     * @Date 16:45 2019/4/3
+     * @param username
+     * @param cartList
+     * @return void
+     **/
+    void mergeCartList(String username,List<Cart> cartList);
+
+    /**
+     * @author 举个栗子
+     * @Description 从redis中取出购物车
+     * @Date 19:45 2019/4/3
+     * @param username
+     * @return java.util.List<cn.itcast.core.pojo.cart.Cart>
+     **/
+    List<Cart> findCartListFromRedis(String username);
 }

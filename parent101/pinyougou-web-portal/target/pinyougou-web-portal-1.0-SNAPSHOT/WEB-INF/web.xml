@@ -39,7 +39,7 @@
     </filter-mapping>
 
     <!-- Spring Security权限配置-->
-    <!-- <context-param>
+     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>classpath:spring/spring-securirty.xml</param-value>
     </context-param>
@@ -53,5 +53,5 @@
     <filter-mapping>
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/*</url-pattern>
-    </filter-mapping> -->
+    </filter-mapping>
 </web-app>
