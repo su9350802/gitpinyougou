@@ -18,7 +18,7 @@ public interface PayService {
      * @param
      * @return java.util.Map<java.lang.String,java.lang.String>
      **/
-    Map<String,String> createNative() throws Exception;
+    Map<String,String> createNative(String username) throws Exception;
 
     /**
      * @author 举个栗子

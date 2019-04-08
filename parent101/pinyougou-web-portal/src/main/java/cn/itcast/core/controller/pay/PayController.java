@@ -3,6 +3,7 @@ package cn.itcast.core.controller.pay;
 import cn.itcast.core.entity.Result;
 import cn.itcast.core.service.pay.PayService;
 import com.alibaba.dubbo.config.annotation.Reference;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -31,7 +32,8 @@ public class PayController {
      **/
     @RequestMapping("/createNative.do")
     public Map<String, String> createNative() throws Exception {
-        return payService.createNative();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return payService.createNative(username);
     }
 
     @RequestMapping("/queryPayStatus.do")

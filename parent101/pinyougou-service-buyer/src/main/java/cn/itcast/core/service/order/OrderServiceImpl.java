@@ -1,10 +1,12 @@
 package cn.itcast.core.service.order;
 
 import cn.itcast.core.dao.item.ItemDao;
+import cn.itcast.core.dao.log.PayLogDao;
 import cn.itcast.core.dao.order.OrderDao;
 import cn.itcast.core.dao.order.OrderItemDao;
 import cn.itcast.core.pojo.cart.Cart;
 import cn.itcast.core.pojo.item.Item;
+import cn.itcast.core.pojo.log.PayLog;
 import cn.itcast.core.pojo.order.Order;
 import cn.itcast.core.pojo.order.OrderItem;
 import cn.itcast.core.utils.uniquekey.IdWorker;
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -42,6 +45,9 @@ public class OrderServiceImpl implements OrderService {
     @Resource
     private OrderItemDao orderItemDao;
 
+    @Resource
+    private PayLogDao payLogDao;
+
     /**
      * @param username
      * @param order
@@ -57,8 +63,11 @@ public class OrderServiceImpl implements OrderService {
         // 保存订单：根据商家进行分类
         List<Cart> cartList = (List<Cart>) redisTemplate.boundHashOps("BUYER_CART").get(username);
         if (cartList != null && cartList.size() > 0) {
+            double totalPrice = 0f;   // 本次交易的总金额
+            List<Long> orderList = new ArrayList<>();   // 保存订单号
             for (Cart cart : cartList) {    // 根据商家进行分类
                 long orderId = idWorker.nextId();
+                orderList.add(orderId);
                 order.setOrderId(orderId);  // 主键
                 double payment = 0f;        // 订单的总金额(购买的该商家下的商品的总金额)
                 order.setPaymentType("1");  // 支付方式：在线支付
@@ -93,8 +102,23 @@ public class OrderServiceImpl implements OrderService {
                 // 总金额 = 该商家的订单明细的价格
                 order.setPayment(new BigDecimal(payment));
                 orderDao.insertSelective(order);
+
+                totalPrice += payment;
             }
 
+            // 需要生成交易日志
+            PayLog payLog = new PayLog();
+            payLog.setOutTradeNo(String.valueOf(idWorker.nextId()));    // 本次交易的流水(订单号)
+            payLog.setCreateTime(new Date());   // 交易日志的创建日期
+            payLog.setTotalFee((long)totalPrice * 100);     // 本次交易的总金额(所有商家下的订单总金额)
+            payLog.setUserId(username);     // 购买商品的用户
+            payLog.setTradeState("0");      // 未交易(支付)
+            // 集合---->json串
+            payLog.setOrderList(orderList.toString().replace("[","").replace("]",""));  // 订单号
+            payLog.setPayType("1");             // 支付类型：在线支付
+            payLogDao.insertSelective(payLog);  // 初始化交易日志
+            // 将交易日志存储到缓存中
+            redisTemplate.boundHashOps("payLog").put(username,payLog);
             // 清空购物车
             redisTemplate.boundHashOps("BUYER_CART").delete(username);
         }

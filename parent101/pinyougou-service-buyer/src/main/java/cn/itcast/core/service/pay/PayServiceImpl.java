@@ -1,13 +1,17 @@
 package cn.itcast.core.service.pay;
 
 
+import cn.itcast.core.dao.log.PayLogDao;
+import cn.itcast.core.pojo.log.PayLog;
 import cn.itcast.core.utils.httpclient.HttpClient;
 import cn.itcast.core.utils.uniquekey.IdWorker;
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.wxpay.sdk.WXPayUtil;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,6 +40,12 @@ public class PayServiceImpl implements PayService {
     @Value("${notifyurl}")
     private String notifyurl;   // 回调地址
 
+    @Resource
+    private RedisTemplate<String,Object> redisTemplate;
+
+    @Resource
+    private PayLogDao payLogDao;
+
     /**
      * @return java.util.Map<java.lang.String , java.lang.String>
      * @author 举个栗子
@@ -43,9 +53,11 @@ public class PayServiceImpl implements PayService {
      * @Date 12:25 2019/4/5
      **/
     @Override
-    public Map<String, String> createNative() throws Exception {
+    public Map<String, String> createNative(String username) throws Exception {
 
-        long out_trade_no = idWorker.nextId();
+        PayLog payLog = (PayLog) redisTemplate.boundHashOps("payLog").get(username);
+
+        String out_trade_no = payLog.getOutTradeNo();
 
         // 调用微信统一下单的接口地址
         String url = "https://api.mch.weixin.qq.com/pay/unifiedorder";
@@ -65,7 +77,8 @@ public class PayServiceImpl implements PayService {
         data.put("body","品优购订单支付");
 
         // 商户订单号 out_trade_no
-        data.put("out_trade_no",String.valueOf(out_trade_no));
+        // data.put("out_trade_no",String.valueOf(out_trade_no));
+        data.put("out_trade_no",payLog.getOutTradeNo());
 
         // 标价金额	total_fee
         data.put("total_fee","1");      // 支付金额
@@ -91,7 +104,7 @@ public class PayServiceImpl implements PayService {
         String strXML = httpClient.getContent();
         // 将xml转成map
         Map<String,String> map = WXPayUtil.xmlToMap(strXML);
-        map.put("out_trade_no",String.valueOf(out_trade_no));
+        map.put("out_trade_no",out_trade_no);
         map.put("total_fee","1");   // 展示金额
         return map;
     }
@@ -130,6 +143,20 @@ public class PayServiceImpl implements PayService {
         // 响应结果（xml转成map）
         String strXML = httpClient.getContent();
         Map<String,String> map = WXPayUtil.xmlToMap(strXML);
+
+        // 如果支付成功，更新交易日志
+        String tradeState = map.get("trade_state");
+        if ("SUCCESS".equals(tradeState)) {
+            PayLog payLog = new PayLog();
+            payLog.setOutTradeNo(out_trade_no);     // 主键
+            payLog.setPayTime(new Date());          // 支付完成日期
+            payLog.setTradeState("1");              // 交易状态：支付成功
+            payLog.setTransactionId(map.get("transaction_id"));
+            payLogDao.updateByPrimaryKeySelective(payLog);
+
+            // TODO 删除缓存中的交易日志
+
+        }
         return map;
     }
 }
